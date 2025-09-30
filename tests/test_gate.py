@@ -21,7 +21,6 @@ def test_peek_next_line():
     g.arrive("fastpass","f1")
     assert g.peek_next_line() == "fastpass"
 
-
 # --- Edge Cases ---
 def test_edge_serve_when_both_empty():
     g = Gate()
@@ -45,12 +44,15 @@ def test_long_mixed_arrivals_and_service():
     g = Gate()
     # Seed queues
     for i in range(1, 6):
-        g.arrive("regular", f"r{i}")
+        g.arrive("regular", f"r{i}")  # r1..r5
     g.arrive("fastpass", "f1"); g.arrive("fastpass", "f2")
+    
     served = []
-    for _ in range(8):
+    # Only 7 people in total, so serve exactly 7 times
+    for _ in range(7):
         served.append(g.serve())
-    # Pattern: F,R,R,R cycling with skips handled; check relative counts
-    # Expect 2 fastpass served and 6 regulars in first 8 serves (since both lines have stock)
+    
+    # Pattern: F,R,R,R cycling with skips handled
+    # Expect 2 fastpass served and 5 regulars in 7 serves
     assert served.count("f1") + served.count("f2") == 2
-    assert sum(1 for s in served if s.startswith("r")) == 6
+    assert sum(1 for s in served if s.startswith("r")) == 5

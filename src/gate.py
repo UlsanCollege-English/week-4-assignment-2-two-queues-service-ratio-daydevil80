@@ -1,27 +1,45 @@
-
-
+# src/gate.py
 from collections import deque
 
 class Gate:
     def __init__(self):
-        # TODO: create two queues and a cycle pointer 0..3 for [F,R,R,R]
-        self._pattern = ["fastpass","regular","regular","regular"]
-        self._idx = 0
-        self._fast = None  # TODO
-        self._reg = None   # TODO
+        self._pattern = ["fastpass", "regular", "regular", "regular"]
+        self._idx = 0  # current index in the pattern
+        self._fast = deque()  # fastpass queue
+        self._reg = deque()   # regular queue
 
     def arrive(self, line, person_id):
-        # TODO: enqueue into the chosen line
-        raise NotImplementedError
+        if line == "fastpass":
+            self._fast.append(person_id)
+        elif line == "regular":
+            self._reg.append(person_id)
+        else:
+            raise ValueError("Unknown line type")
 
     def serve(self):
-        """
-        Return the next person according to the repeating pattern.
-        Skip empty lines but still move the cycle pointer correctly.
-        Decide error behavior when both lines are empty.
-        """
-        raise NotImplementedError
+        if not self._fast and not self._reg:
+            raise IndexError("Both lines empty")
+
+        # Keep looping until we find a non-empty queue
+        while True:
+            line_type = self._pattern[self._idx]
+            self._idx = (self._idx + 1) % 4
+
+            if line_type == "fastpass" and self._fast:
+                return self._fast.popleft()
+            elif line_type == "regular" and self._reg:
+                return self._reg.popleft()
+            # If the chosen line is empty, continue to next pattern slot
 
     def peek_next_line(self):
-        # TODO: compute which line would be served next (consider empties)
-        raise NotImplementedError
+        if not self._fast and not self._reg:
+            return None
+
+        temp_idx = self._idx
+        while True:
+            line_type = self._pattern[temp_idx]
+            temp_idx = (temp_idx + 1) % 4
+            if line_type == "fastpass" and self._fast:
+                return "fastpass"
+            elif line_type == "regular" and self._reg:
+                return "regular"
